@@ -8,19 +8,20 @@ BEGIN
 END $$;
 
 CREATE TABLE IF NOT EXISTS tasks (
-    id SERIAL PRIMARY KEY,
-    target_url TEXT NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    url TEXT NOT NULL,
     status task_status DEFAULT 'pending' NOT NULL,
-    http_status_code INTEGER,
-    error_message TEXT,
+    attempts INTEGER DEFAULT 0 NOT NULL,
+    max_attempts INTEGER DEFAULT 3 NOT NULL,
+    last_error TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks (status);
+CREATE INDEX IF NOT EXISTS idx_tasks_status_polling ON tasks (id) WHERE status = 'pending';
 
-INSERT INTO tasks (target_url) 
-SELECT url FROM (
+INSERT INTO tasks (url) 
+SELECT mock_url FROM (
     VALUES
     ('https://github.com'),
     ('https://google.com'),
@@ -31,8 +32,8 @@ SELECT url FROM (
     ('https://aws.amazon.com'),
     ('https://api.github.com'),
     ('https://httpbin.org/delay/5'),
-    ('https://golang.org');
-) AS mock_data(url)
+    ('https://golang.org')
+) AS mock_data(mock_url)
 WHERE NOT EXISTS (SELECT 1 FROM tasks);
 
 COMMIT;

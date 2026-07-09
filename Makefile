@@ -2,7 +2,7 @@ DB_SERVICE_NAME=postgres
 
 # Application Entry point
 start: check-db
-	go run main.go
+	go run cmd/daemon/main.go
 
 # Internal target: Ensures DB is up and running before proceeding
 check-db:

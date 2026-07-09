@@ -28,7 +28,6 @@ func Init(databaseURL string) (*pgxpool.Pool, error) {
 
 	pool, err := pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {
-		pool.Close()
 		return nil, fmt.Errorf("failed to reach target database instance: %w", err)
 	}
 
