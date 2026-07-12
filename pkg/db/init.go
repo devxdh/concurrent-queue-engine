@@ -1,3 +1,4 @@
+// Package db handles all the db related work
 package db
 
 import (
