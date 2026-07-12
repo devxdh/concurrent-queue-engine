@@ -71,3 +71,53 @@ func (ts *TaskStore) FetchNextTask(ctx context.Context) (pgx.Tx, *Task, error) {
 
 	return tx, &task, nil
 }
+
+func (ts *TaskStore) MarkComplete(ctx context.Context, tx pgx.Tx, taskID int64) error {
+	defer tx.Rollback(ctx)
+
+	query := `
+		UPDATE tasks
+		SET status = 'completed', updated_at = $1 
+		WHERE id = $2;
+	`
+
+	_, err := tx.Exec(ctx, query, time.Now(), taskID)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
+}
+
+func (ts *TaskStore) MarkFailed(
+	ctx context.Context,
+	tx pgx.Tx,
+	taskID int64,
+	errMsg string,
+	attempts int,
+	maxAttempts int,
+) error {
+	defer tx.Rollback(ctx)
+
+	nextStatus := "pending"
+	if attempts+1 >= maxAttempts {
+		nextStatus = "failed"
+	}
+
+	query := `
+		UPDATE tasks
+		SET 
+			status = $1
+			attempts = attempts + 1,
+			last_error = $2,
+			updated_at = $3
+		WHERE id = $4;
+	`
+
+	_, err := tx.Exec(ctx, query, nextStatus, errMsg, time.Now(), taskID)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
+}
