@@ -59,7 +59,7 @@ func (p *Pool) worker(workerID int) {
 			continue
 		}
 
-		fmt.Printf("[WORKER %d] Claimed Task ID %d - Validating URL: %s\n", workerID, task.ID, task.URL)
+		fmt.Printf("[WORKER #%d] Claimed Task ID %d - Validating URL: %s\n", workerID, task.ID, task.URL)
 
 		ioCtx, ioCancel := context.WithTimeout(context.Background(), 5*time.Second)
 
@@ -67,7 +67,7 @@ func (p *Pool) worker(workerID int) {
 		ioCancel()
 
 		if err != nil {
-			fmt.Printf("[WORKER %d] Task ID %d Verification Failed: %v\n", workerID, task.ID, err)
+			fmt.Printf("[WORKER #%d] Task ID %d Verification Failed: %v\n", workerID, task.ID, err)
 
 			updateErr := job.Store.MarkFailed(p.ctx, tx, task.ID, err.Error(), task.Attempts, task.MaxAttempts)
 			if updateErr != nil {
@@ -76,7 +76,7 @@ func (p *Pool) worker(workerID int) {
 			continue
 		}
 
-		fmt.Printf("[WORKER %d] Task ID %d Verification Succeeded\n", workerID, task.ID)
+		fmt.Printf("[WORKER #%d] Task ID %d Verification Succeeded\n", workerID, task.ID)
 		if updateErr := job.Store.MarkComplete(p.ctx, tx, task.ID); updateErr != nil {
 			fmt.Printf("[CRITICAL] State sync completion failure for Task ID %d: %v\n", task.ID, updateErr)
 		}
