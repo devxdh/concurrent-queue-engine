@@ -107,7 +107,7 @@ func (ts *TaskStore) MarkFailed(
 	query := `
 		UPDATE tasks
 		SET 
-			status = $1
+			status = $1,
 			attempts = attempts + 1,
 			last_error = $2,
 			updated_at = $3

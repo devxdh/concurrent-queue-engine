@@ -12,7 +12,7 @@ type EnvConfig struct {
 }
 
 func Env() (EnvConfig, error) {
-	_ = godotenv.Load("../.env")
+	_ = godotenv.Load(".env")
 
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
